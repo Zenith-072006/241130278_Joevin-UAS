@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-    <link rel="stylesheet" href="./style//style.css" />
+    <link rel="stylesheet" href="./style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -12,7 +12,172 @@
       rel="stylesheet"
     />
   </head>
-  <body></body>
-  <script src="./script/jquery-3.7.1.min.js"></script>
-  <script src="./script/script.js"></script>
+  <body>
+    <header><h1>Toko Paedi.</h1></header>
+    
+  <form id="cartForm">
+    <div class="product-list">
+      <div class="product">
+        <img src="./images/produk1.jpg" alt="Denmark Backpack" class="product-image" />
+        <div class="info">
+          <p class="title">Denmark Backpack</p>
+          <p>One-Size</p>
+          <p>Cream</p>
+        </div>
+        <div class="quantity">
+          <button class="minus">-</button>
+          <input type="number" value="1" min="1" />
+          <button class="plus">+</button>
+        </div>
+        <div class="price" data-price="20">$20</div>
+      </div>
+ 
+      <div class="product">
+        <img src="images/produk2.jpeg" alt="Casual Backpack" class="product-image" />
+        <div class="info">
+          <p class="title">Casual Backpack</p>
+          <p>One-Size</p>
+          <p>Black</p>
+        </div>
+        <div class="quantity">
+          <button class="minus">-</button>
+          <input type="number" value="1" min="1" />
+          <button class="plus">+</button>
+        </div>
+        <div class="price" data-price="85">$85</div>
+      </div>
+ 
+      <div class="product">
+        <img src="images/produk3.png" alt="Men Backpack" class="product-image" />
+        <div class="info">
+          <p class="title">Men Backpack</p>
+          <p>One-Size</p>
+          <p>Grey</p>
+        </div>
+        <div class="quantity">
+          <button class="minus">-</button>
+          <input type="number" value="1" min="1" />
+          <button class="plus">+</button>
+        </div>
+        <div class="price" data-price="150">$150</div>
+      </div>
+ 
+      <div class="product">
+        <img src="images/produk4.jpg" alt="Women Backpack" class="product-image" />
+        <div class="info">
+          <p class="title">Women Backpack</p>
+          <p>One-Size</p>
+          <p>Pink</p>
+        </div>
+        <div class="quantity">
+          <button class="minus">-</button>
+          <input type="number" value="1" min="1" />
+          <button class="plus">+</button>
+        </div>
+        <div class="price" data-price="60">$60</div>
+      </div>
+    </div>
+ 
+    <div class="form-section">
+      <table>
+      <h3>Order Summary</h3>
+      <input type="text" id="nama" placeholder="Nama" required />
+      <input type="email" id="email" placeholder="Email" required />
+      <input type="text" id="promo" placeholder="Promo Code" />
+ 
+      <div class="buttons"> 
+        <button type="reset">Reset</button>
+        <button type="submit">Apply</button>
+      </div>
+ 
+      <div id="itemSummary" style="display:none;"></div>
+      <div id="totalSection">Total: $0</div>
+    </table>
+    </div>
+  </form>
+
+  </body>
+  <script src="./jquery-3.7.1.min.js"></script>
+  <script src="./index.js"></script>
+  <script>
+    function updateProductTotal() {
+      $('.product').each(function () {
+        const qty = parseInt($(this).find('input[type=number]').val());
+        const unitPrice = parseFloat($(this).find('.price').data('price'));
+        const total = qty * unitPrice;
+        $(this).find('.price').text(`$${total}`);
+      });
+    }
+ 
+    function applyPromo() {
+      const code = $('#promo').val().trim().toUpperCase();
+      let finalTotal = 0;
+      let summary = "<strong>Item Ditambahkan:</strong><ul>";
+ 
+      $('.product').each(function () {
+        const title = $(this).find('.title').text().trim();
+        const qty = parseInt($(this).find('input[type=number]').val());
+        const unitPrice = parseFloat($(this).find('.price').data('price'));
+ 
+        if (qty > 0) {
+          const subTotal = qty * unitPrice;
+          summary += `<li>${title} (${qty} pcs): $${subTotal}</li>`;
+          finalTotal += subTotal;
+        }
+      });
+ 
+      summary += "</ul>";
+ 
+      if (finalTotal === 0) {
+        $('#itemSummary').html("<em>Tidak ada item yang ditambahkan.</em>").show();
+        $('#totalSection').hide();
+        return;
+      }
+ 
+      let totalDisplay = finalTotal;
+      if (code === "DISKON50") {
+        totalDisplay = finalTotal * 0.5;
+      }
+ 
+      $('#itemSummary').html(summary).show();
+      $('#totalSection').html(`Total: $${totalDisplay.toFixed(2)}`).show();
+    }
+    $('.plus').click(function () {
+      const input = $(this).siblings('input');
+      input.val(parseInt(input.val()) + 1);
+      updateProductTotal();
+    });
+ 
+    $('.minus').click(function () {
+      const input = $(this).siblings('input');
+      let value = parseInt(input.val());
+      if (value > 0) input.val(value - 1);
+      updateProductTotal();
+    });
+ 
+    $('input[type=number]').on('change', function () {
+      if (parseInt(this.value) < 0) this.value = 0;
+      updateProductTotal();
+    });
+ 
+    $('#cartForm').on('submit', function (e) {
+      e.preventDefault();
+      applyPromo();
+    });
+ 
+    $('button[type=reset]').click(function () {
+      setTimeout(() => {
+        $('input[type=number]').val(0);
+        $('#promo').val('');
+        $('#itemSummary').hide().html('');
+        $('#totalSection').hide();
+        updateProductTotal();
+      }, 100);
+    });
+ 
+    $(document).ready(function () {
+      updateProductTotal();
+    });
+
+  </script>
 </html>
